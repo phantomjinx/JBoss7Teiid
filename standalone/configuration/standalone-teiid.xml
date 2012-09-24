@@ -1,6 +1,7 @@
 <?xml version='1.0' encoding='UTF-8'?>
 
 <server xmlns="urn:jboss:domain:1.2">
+
     <extensions>
         <extension module="org.jboss.as.clustering.infinispan"/>
         <extension module="org.jboss.as.configadmin"/>
@@ -27,6 +28,7 @@
         <extension module="org.jboss.as.webservices"/>
         <extension module="org.jboss.as.weld"/>
     </extensions>
+
     <management>
         <security-realms>
             <security-realm name="ManagementRealm">
@@ -49,6 +51,7 @@
             </http-interface>
         </management-interfaces>
     </management>
+
     <profile>
         <subsystem xmlns="urn:jboss:domain:logging:1.1">
             <console-handler name="CONSOLE">
@@ -118,7 +121,7 @@
                     <driver name="teiid" module="org.jboss.teiid.client">
                         <driver-class>org.teiid.jdbc.TeiidDriver</driver-class>
                         <xa-datasource-class>org.teiid.jdbc.TeiidDataSource</xa-datasource-class>
-                    </driver> 
+                    </driver>
                 </drivers>
             </datasources>
         </subsystem>
@@ -178,10 +181,10 @@
             </cache-container>
             <cache-container name="teiid" default-cache="resultset">
                 <local-cache name="resultset">
-                    <expiration lifespan="7200000" />
-                    <eviction max-entries="1024" strategy="LRU"/>
+                    <eviction strategy="LRU" max-entries="1024"/>
+                    <expiration lifespan="7200000"/>
                 </local-cache>
-            </cache-container>            
+            </cache-container>
         </subsystem>
         <subsystem xmlns="urn:jboss:domain:jaxrs:1.0"/>
         <subsystem xmlns="urn:jboss:domain:jca:1.1">
@@ -219,14 +222,13 @@
         <subsystem xmlns="urn:jboss:domain:naming:1.1"/>
         <subsystem xmlns="urn:jboss:domain:osgi:1.2" activation="lazy">
             <properties>
-                <!-- Specifies the beginning start level of the framework -->
-                <property name="org.osgi.framework.startlevel.beginning">1</property>
+                <property name="org.osgi.framework.startlevel.beginning">
+                    1
+                </property>
             </properties>
             <capabilities>
-                <!-- modules registered with the OSGi layer on startup -->
                 <capability name="javax.servlet.api:v25"/>
                 <capability name="javax.transaction.api"/>
-                <!-- bundles started in startlevel 1 -->
                 <capability name="org.apache.felix.log" startlevel="1"/>
                 <capability name="org.jboss.osgi.logging" startlevel="1"/>
                 <capability name="org.apache.felix.configadmin" startlevel="1"/>
@@ -290,59 +292,61 @@
                             <module-option name="rolesProperties" value="${jboss.server.config.dir}/teiid-security-roles.properties"/>
                         </login-module>
                     </authentication>
-                </security-domain>                
+                </security-domain>
             </security-domains>
         </subsystem>
         <subsystem xmlns="urn:jboss:domain:teiid:1.0">
-            <async-thread-pool>teiid-async</async-thread-pool>
+            <async-thread-pool>
+                teiid-async
+            </async-thread-pool>
+            <policy-decider-module>
+                org.jboss.teiid
+            </policy-decider-module>
             <resultset-cache infinispan-container="teiid"/>
-            
             <transport name="embedded"/>
-            <transport name="jdbc" protocol="teiid" socket-binding="teiid-jdbc">
+            <transport name="jdbc" socket-binding="teiid-jdbc">
                 <authentication security-domain="teiid-security"/>
             </transport>
-            <transport name="odbc" protocol="pg" socket-binding="teiid-odbc">
+            <transport name="odbc" socket-binding="teiid-odbc" protocol="pg">
                 <authentication security-domain="teiid-security"/>
             </transport>
-            <policy-decider-module>org.jboss.teiid</policy-decider-module>        
-            <translator name="jdbc-simple" module="org.jboss.teiid.translator.jdbc"/>
-            <translator name="jdbc-ansi" module="org.jboss.teiid.translator.jdbc"/>
             <translator name="access" module="org.jboss.teiid.translator.jdbc"/>
             <translator name="db2" module="org.jboss.teiid.translator.jdbc"/>
             <translator name="derby" module="org.jboss.teiid.translator.jdbc"/>
+            <translator name="file" module="org.jboss.teiid.translator.file"/>
             <translator name="h2" module="org.jboss.teiid.translator.jdbc"/>
+            <translator name="hive" module="org.jboss.teiid.translator.hive"/>
             <translator name="hsql" module="org.jboss.teiid.translator.jdbc"/>
             <translator name="informix" module="org.jboss.teiid.translator.jdbc"/>
+            <translator name="ingres" module="org.jboss.teiid.translator.jdbc"/>
+            <translator name="ingres93" module="org.jboss.teiid.translator.jdbc"/>
+            <translator name="intersystems-cache" module="org.jboss.teiid.translator.jdbc"/>
+            <translator name="jdbc-ansi" module="org.jboss.teiid.translator.jdbc"/>
+            <translator name="jdbc-simple" module="org.jboss.teiid.translator.jdbc"/>
+            <translator name="jpa2" module="org.jboss.teiid.translator.jpa"/>
+            <translator name="ldap" module="org.jboss.teiid.translator.ldap"/>
+            <translator name="loopback" module="org.jboss.teiid.translator.loopback"/>
             <translator name="metamatrix" module="org.jboss.teiid.translator.jdbc"/>
+            <translator name="modeshape" module="org.jboss.teiid.translator.jdbc"/>
             <translator name="mysql" module="org.jboss.teiid.translator.jdbc"/>
             <translator name="mysql5" module="org.jboss.teiid.translator.jdbc"/>
+            <translator name="netezza" module="org.jboss.teiid.translator.jdbc"/>
+            <translator name="olap" module="org.jboss.teiid.translator.olap"/>
             <translator name="oracle" module="org.jboss.teiid.translator.jdbc"/>
             <translator name="postgresql" module="org.jboss.teiid.translator.jdbc"/>
+            <translator name="salesforce" module="org.jboss.teiid.translator.salesforce"/>
             <translator name="sqlserver" module="org.jboss.teiid.translator.jdbc"/>
             <translator name="sybase" module="org.jboss.teiid.translator.jdbc"/>
             <translator name="teiid" module="org.jboss.teiid.translator.jdbc"/>
             <translator name="teradata" module="org.jboss.teiid.translator.jdbc"/>
-            <translator name="modeshape" module="org.jboss.teiid.translator.jdbc"/>
-            <translator name="ingres" module="org.jboss.teiid.translator.jdbc"/>
-            <translator name="ingres93" module="org.jboss.teiid.translator.jdbc"/>
-            <translator name="intersystems-cache" module="org.jboss.teiid.translator.jdbc"/>
-            <translator name="netezza" module="org.jboss.teiid.translator.jdbc"/>
-            <translator name="file" module="org.jboss.teiid.translator.file"/>
-            <translator name="ldap" module="org.jboss.teiid.translator.ldap"/>
-            <translator name="loopback" module="org.jboss.teiid.translator.loopback"/>
-            <translator name="olap" module="org.jboss.teiid.translator.olap"/>
             <translator name="ws" module="org.jboss.teiid.translator.ws"/>
-            <translator name="salesforce" module="org.jboss.teiid.translator.salesforce"/>
-            <translator name="hive" module="org.jboss.teiid.translator.hive"/>
-            <translator name="jpa2" module="org.jboss.teiid.translator.jpa"/>
-            
-        </subsystem>         
+        </subsystem>
         <subsystem xmlns="urn:jboss:domain:threads:1.1">
             <bounded-queue-thread-pool name="teiid-async">
-                <max-threads count="4"/>
                 <queue-length count="100"/>
+                <max-threads count="4"/>
             </bounded-queue-thread-pool>
-        </subsystem>        
+        </subsystem>
         <subsystem xmlns="urn:jboss:domain:transactions:1.1">
             <core-environment>
                 <process-id>
@@ -371,6 +375,7 @@
         </subsystem>
         <subsystem xmlns="urn:jboss:domain:weld:1.0"/>
     </profile>
+
     <interfaces>
         <interface name="management">
             <inet-address value="${jboss.bind.address.management:127.0.0.1}"/>
@@ -378,20 +383,15 @@
         <interface name="public">
             <inet-address value="${jboss.bind.address:127.0.0.1}"/>
         </interface>
-        <!-- TODO - only show this if the jacorb subsystem is added  -->
         <interface name="unsecure">
-            <!--
-              ~  Used for IIOP sockets in the standard configuration.
-              ~                  To secure JacORB you need to setup SSL 
-              -->
             <inet-address value="${jboss.bind.address.unsecure:127.0.0.1}"/>
         </interface>
         <interface name="any">
             <any-ipv4-address/>
         </interface>
-     </interfaces>
+    </interfaces>
 
-     <socket-binding-group name="standard-sockets" default-interface="any" port-offset="${jboss.socket.binding.port-offset:0}">
+    <socket-binding-group name="standard-sockets" default-interface="any" port-offset="${jboss.socket.binding.port-offset:0}">
         <socket-binding name="management-native" port="${jboss.management.native.port:9999}"/>
         <socket-binding name="management-http" port="${jboss.management.http.port:9990}"/>
         <socket-binding name="management-https" port="${jboss.management.https.port:9443}"/>
@@ -403,9 +403,10 @@
         <socket-binding name="txn-recovery-environment" port="4712"/>
         <socket-binding name="txn-status-manager" port="4713"/>
         <socket-binding name="teiid-jdbc" port="31000"/>
-        <socket-binding name="teiid-odbc" port="35432"/>        
+        <socket-binding name="teiid-odbc" port="35432"/>
         <outbound-socket-binding name="mail-smtp">
             <remote-destination host="localhost" port="25"/>
         </outbound-socket-binding>
     </socket-binding-group>
+
 </server>
