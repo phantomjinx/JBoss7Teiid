@@ -55,7 +55,7 @@
     <profile>
         <subsystem xmlns="urn:jboss:domain:logging:1.1">
             <console-handler name="CONSOLE">
-                <level name="INFO"/>
+                <level name="DEBUG"/>
                 <formatter>
                     <pattern-formatter pattern="%d{HH:mm:ss,SSS} %-5p [%c] (%t) %s%E%n"/>
                 </formatter>
@@ -69,22 +69,22 @@
                 <append value="true"/>
             </periodic-rotating-file-handler>
             <logger category="com.arjuna">
-                <level name="WARN"/>
+                <level name="DEBUG"/>
             </logger>
             <logger category="org.apache.tomcat.util.modeler">
-                <level name="WARN"/>
+                <level name="DEBUG"/>
             </logger>
             <logger category="sun.rmi">
-                <level name="WARN"/>
+                <level name="DEBUG"/>
             </logger>
             <logger category="jacorb">
-                <level name="WARN"/>
+                <level name="DEBUG"/>
             </logger>
             <logger category="jacorb.config">
-                <level name="ERROR"/>
+                <level name="DEBUG"/>
             </logger>
             <root-logger>
-                <level name="INFO"/>
+                <level name="DEBUG"/>
                 <handlers>
                     <handler name="CONSOLE"/>
                     <handler name="FILE"/>
