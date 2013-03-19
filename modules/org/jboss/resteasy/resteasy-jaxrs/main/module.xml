@@ -28,6 +28,7 @@
     </properties>
 
     <resources>
+       <resource-root path="resteasy-teiid-patch.jar"/>
         <resource-root path="async-http-servlet-3.0-2.3.2.Final.jar"/>
         <resource-root path="resteasy-jaxrs-2.3.2.Final.jar"/>
 	<resource-root path="resteasy-jaxrs-2.3.2.Final-jandex.jar"/>
