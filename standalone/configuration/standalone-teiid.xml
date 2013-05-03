@@ -267,6 +267,38 @@
                         </connection-definition>
                     </connection-definitions>
                 </resource-adapter>
+                <resource-adapter>
+                    <archive>
+                        teiid-connector-ws.rar
+                    </archive>
+                    <transaction-support>NoTransaction</transaction-support>
+                    <connection-definitions>
+                        <connection-definition class-name="org.teiid.resource.adapter.ws.WSManagedConnectionFactory" jndi-name="java:/PREVIEW_89616e95-3287-4f44-9f89-043223574093_US_States_stateService" enabled="true" pool-name="PREVIEW_89616e95-3287-4f44-9f89-043223574093_US_States_stateService">
+                            <config-property name="SecurityType">
+                                None
+                            </config-property>
+                            <config-property name="EndPoint">
+                                http://localhost:8080/StateService/StateService
+                            </config-property>
+                        </connection-definition>
+                    </connection-definitions>
+                </resource-adapter>
+                <resource-adapter>
+                    <archive>
+                        teiid-connector-ws.rar
+                    </archive>
+                    <transaction-support>NoTransaction</transaction-support>
+                    <connection-definitions>
+                        <connection-definition class-name="org.teiid.resource.adapter.ws.WSManagedConnectionFactory" jndi-name="java:/stateService" enabled="true" pool-name="stateService">
+                            <config-property name="SecurityType">
+                                None
+                            </config-property>
+                            <config-property name="EndPoint">
+                                http://localhost:8080/StateService/StateService
+                            </config-property>
+                        </connection-definition>
+                    </connection-definitions>
+                </resource-adapter>
             </resource-adapters>
         </subsystem>
         <subsystem xmlns="urn:jboss:domain:sar:1.0"/>
@@ -429,6 +461,9 @@
     <deployments>
         <deployment name="mysql-connector-java-5.1.24.jar" runtime-name="mysql-connector-java-5.1.24.jar">
             <fs-archive path="deployments/mysql-connector-java-5.1.24.jar" relative-to="jboss.server.base.dir"/>
+				</deplyoment>
+        <deployment name="USStates.vdb" runtime-name="USStates.vdb">
+            <content sha1="edf134d43ecbee9465179b4277ca649f972a9d31"/>
         </deployment>
     </deployments>
 </server>
