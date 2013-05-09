@@ -426,4 +426,9 @@
         </outbound-socket-binding>
     </socket-binding-group>
 
+    <deployments>
+        <deployment name="mysql-connector-java-5.1.24.jar" runtime-name="mysql-connector-java-5.1.24.jar">
+            <fs-archive path="deployments/mysql-connector-java-5.1.24.jar" relative-to="jboss.server.base.dir"/>
+        </deployment>
+    </deployments>
 </server>
