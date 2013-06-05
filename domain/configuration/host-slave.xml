@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?>
 
-<host xmlns="urn:jboss:domain:1.2">
+<host xmlns="urn:jboss:domain:1.4">
 
     <management>
         <security-realms>
@@ -11,13 +11,18 @@
                 </server-identities>
 
                 <authentication>
+                    <local default-user="$local" />
                     <properties path="mgmt-users.properties" relative-to="jboss.domain.config.dir"/>
                 </authentication>
             </security-realm>
             <security-realm name="ApplicationRealm">
                 <authentication>
+                    <local default-user="$local" allowed-users="*" />
                     <properties path="application-users.properties" relative-to="jboss.domain.config.dir" />
                 </authentication>
+                <authorization>
+                    <properties path="application-roles.properties" relative-to="jboss.domain.config.dir"/>
+                </authorization>
             </security-realm>
         </security-realms>
         <management-interfaces>

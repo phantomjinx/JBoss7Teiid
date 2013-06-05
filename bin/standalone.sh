@@ -1,5 +1,35 @@
 #!/bin/sh
 
+# Use --debug to activate debug mode with an optional argument to specify the port.
+# Usage : standalone.bat --debug
+#         standalone.bat --debug 9797
+
+# By default debug mode is disable.
+DEBUG_MODE=false
+DEBUG_PORT="8787"
+SERVER_OPTS=""
+while [ "$#" -gt 0 ]
+do
+    case "$1" in
+      --debug)
+          DEBUG_MODE=true
+          shift
+          if [ -n "$1" ] && [ "${1#*-}" = "$1" ]; then
+              DEBUG_PORT=$1
+          else
+              SERVER_OPTS="$SERVER_OPTS $1"
+          fi
+          ;;
+      --)
+          shift 
+          break;;
+      *)
+          SERVER_OPTS="$SERVER_OPTS \"$1\""
+          ;;
+    esac
+    shift
+done
+
 DIRNAME=`dirname "$0"`
 PROGNAME=`basename "$0"`
 GREP="grep"
@@ -25,14 +55,6 @@ case "`uname`" in
         ;;
 esac
 
-# Read an optional running configuration file
-if [ "x$RUN_CONF" = "x" ]; then
-    RUN_CONF="$DIRNAME/standalone.conf"
-fi
-if [ -r "$RUN_CONF" ]; then
-    . "$RUN_CONF"
-fi
-
 # For Cygwin, ensure paths are in UNIX format before anything is touched
 if $cygwin ; then
     [ -n "$JBOSS_HOME" ] &&
@@ -51,11 +73,33 @@ if [ "x$JBOSS_HOME" = "x" ]; then
 else
  SANITIZED_JBOSS_HOME=`cd "$JBOSS_HOME"; pwd`
  if [ "$RESOLVED_JBOSS_HOME" != "$SANITIZED_JBOSS_HOME" ]; then
-   echo "WARNING JBOSS_HOME may be pointing to a different installation - unpredictable results may occur."
    echo ""
+   echo "   WARNING:  JBOSS_HOME may be pointing to a different installation - unpredictable results may occur."
+   echo ""
+   echo "             JBOSS_HOME: $JBOSS_HOME"
+   echo ""
+   sleep 2s
  fi
 fi
 export JBOSS_HOME
+
+# Read an optional running configuration file
+if [ "x$RUN_CONF" = "x" ]; then
+    RUN_CONF="$DIRNAME/standalone.conf"
+fi
+if [ -r "$RUN_CONF" ]; then
+    . "$RUN_CONF"
+fi
+
+# Set debug settings if not already set
+if [ "$DEBUG_MODE" = "true" ]; then
+    DEBUG_OPT=`echo $JAVA_OPTS | $GREP "\-agentlib:jdwp"`
+    if [ "x$DEBUG_OPT" = "x" ]; then
+        JAVA_OPTS="$JAVA_OPTS -agentlib:jdwp=transport=dt_socket,address=$DEBUG_PORT,server=y,suspend=n"
+    else
+        echo "Debug already enabled in JAVA_OPTS, ignoring --debug argument"
+    fi
+fi
 
 # Setup the JVM
 if [ "x$JAVA" = "x" ]; then
@@ -102,11 +146,6 @@ if [ "$PRESERVE_JAVA_OPTS" != "true" ]; then
         if [ "x$NO_COMPRESSED_OOPS" = "x" ]; then
             "$JAVA" $JVM_OPTVERSION -server -XX:+UseCompressedOops -version >/dev/null 2>&1 && PREPEND_JAVA_OPTS="$PREPEND_JAVA_OPTS -XX:+UseCompressedOops"
         fi
-
-        NO_TIERED_COMPILATION=`echo $JAVA_OPTS | $GREP "\-XX:\-TieredCompilation"`
-        if [ "x$NO_TIERED_COMPILATION" = "x" ]; then
-            "$JAVA" $JVM_OPTVERSION -server -XX:+TieredCompilation -version >/dev/null 2>&1 && PREPEND_JAVA_OPTS="$PREPEND_JAVA_OPTS -XX:+TieredCompilation"
-        fi
     fi
 
     JAVA_OPTS="$PREPEND_JAVA_OPTS $JAVA_OPTS"
@@ -118,9 +157,9 @@ fi
 
 if $linux; then
     # consolidate the server and command line opts
-    SERVER_OPTS="$JAVA_OPTS $@"
+    CONSOLIDATED_OPTS="$JAVA_OPTS $SERVER_OPTS"
     # process the standalone options
-    for var in $SERVER_OPTS
+    for var in $CONSOLIDATED_OPTS
     do
        case $var in
          -Djboss.server.base.dir=*)
@@ -176,26 +215,28 @@ while true; do
    if [ "x$LAUNCH_JBOSS_IN_BACKGROUND" = "x" ]; then
       # Execute the JVM in the foreground
       eval \"$JAVA\" -D\"[Standalone]\" $JAVA_OPTS \
-         \"-Dorg.jboss.boot.log.file=$JBOSS_LOG_DIR/boot.log\" \
+         \"-Dorg.jboss.boot.log.file=$JBOSS_LOG_DIR/server.log\" \
          \"-Dlogging.configuration=file:$JBOSS_CONFIG_DIR/logging.properties\" \
          -jar \"$JBOSS_HOME/jboss-modules.jar\" \
          -mp \"${JBOSS_MODULEPATH}\" \
          -jaxpmodule "javax.xml.jaxp-provider" \
          org.jboss.as.standalone \
          -Djboss.home.dir=\"$JBOSS_HOME\" \
-         "$@"
+         -Djboss.server.base.dir=\"$JBOSS_BASE_DIR\" \
+         "$SERVER_OPTS"
       JBOSS_STATUS=$?
    else
       # Execute the JVM in the background
       eval \"$JAVA\" -D\"[Standalone]\" $JAVA_OPTS \
-         \"-Dorg.jboss.boot.log.file=$JBOSS_LOG_DIR/boot.log\" \
+         \"-Dorg.jboss.boot.log.file=$JBOSS_LOG_DIR/server.log\" \
          \"-Dlogging.configuration=file:$JBOSS_CONFIG_DIR/logging.properties\" \
          -jar \"$JBOSS_HOME/jboss-modules.jar\" \
          -mp \"${JBOSS_MODULEPATH}\" \
          -jaxpmodule "javax.xml.jaxp-provider" \
          org.jboss.as.standalone \
          -Djboss.home.dir=\"$JBOSS_HOME\" \
-         "$@" "&"
+         -Djboss.server.base.dir=\"$JBOSS_BASE_DIR\" \
+         "$SERVER_OPTS" "&"
       JBOSS_PID=$!
       # Trap common signals and relay them to the jboss process
       trap "kill -HUP  $JBOSS_PID" HUP

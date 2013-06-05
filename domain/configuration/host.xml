@@ -1,18 +1,23 @@
 <?xml version='1.0' encoding='UTF-8'?>
 
-<host name="master" xmlns="urn:jboss:domain:1.2">
+<host name="master" xmlns="urn:jboss:domain:1.4">
 
     <management>
         <security-realms>
             <security-realm name="ManagementRealm">
                 <authentication>
+                    <local default-user="$local" />
                     <properties path="mgmt-users.properties" relative-to="jboss.domain.config.dir"/>
                 </authentication>
             </security-realm>
             <security-realm name="ApplicationRealm">
                 <authentication>
+                    <local default-user="$local" allowed-users="*" />
                     <properties path="application-users.properties" relative-to="jboss.domain.config.dir" />
                 </authentication>
+                <authorization>
+                    <properties path="application-roles.properties" relative-to="jboss.domain.config.dir"/>
+                </authorization>
             </security-realm>
         </security-realms>
         <management-interfaces>
@@ -28,7 +33,7 @@
     <domain-controller>
        <local/>
        <!-- Alternative remote domain controller configuration with a host and port -->
-       <!-- <remote host="${jboss.domain.master.address}" port="${jboss.domain.master.port:9999}"/> -->
+       <!-- <remote host="${jboss.domain.master.address}" port="${jboss.domain.master.port:9999}" security-realm="ManagementRealm"/> -->
     </domain-controller>
 
     <interfaces>
@@ -60,7 +65,7 @@
             <!-- Remote JPDA debugging for a specific server
             <jvm name="default">
               <jvm-options>
-                <option value="-Xrunjdwp:transport=dt_socket,address=8787,server=y,suspend=n"/>
+                <option value="-agentlib:jdwp=transport=dt_socket,address=8787,server=y,suspend=n"/>
               </jvm-options>
            </jvm>
            -->
